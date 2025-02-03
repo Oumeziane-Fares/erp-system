@@ -11,18 +11,54 @@ class RolePermissionSeeder extends Seeder
 {
     public function run()
     {
-        // Create roles
-        $adminRole = Role::create(['role_name' => 'admin', 'description' => 'Administrator']);
-        $managerRole = Role::create(['role_name' => 'manager', 'description' => 'Manager']);
-        $userRole = Role::create(['role_name' => 'user', 'description' => 'Standard User']);
-
-        // Create permissions
-        $createUser = Permission::create(['permission_name' => 'create-user', 'description' => 'Create new users']);
-        $deleteUser = Permission::create(['permission_name' => 'delete-user', 'description' => 'Delete users']);
+        // Define role-permission mappings
+        $rolePermissions = [
+            'admin' => [
+                'view-products',
+                'create-products',
+                'update-products',
+                'delete-products',
+                'view-suppliers',
+                'create-suppliers',
+                'update-suppliers',
+                'delete-suppliers',
+                'add-stock',
+                'remove-stock',
+            ],
+            'manager' => [
+                'view-products',
+                'view-suppliers',
+                'add-stock',
+                'remove-stock',
+            ],
+            'viewer' => [
+                'view-products',
+                'view-suppliers',
+            ],
+        ];
 
         // Assign permissions to roles
-        $adminRole->permissions()->attach([$createUser->permission_id, $deleteUser->permission_id]);
-        $managerRole->permissions()->attach([$createUser->permission_id]);
+        foreach ($rolePermissions as $roleName => $permissions) {
+            // Get the role ID
+            $role = DB::table('roles')->where('role_name', $roleName)->first();
+            if (!$role) {
+                continue;
+            }
+
+            // Get the permission IDs
+            $permissionIds = DB::table('permissions')
+                ->whereIn('permission_name', $permissions)
+                ->pluck('permission_id')
+                ->toArray();
+
+            // Insert into role_permissions table
+            foreach ($permissionIds as $permissionId) {
+                DB::table('role_permissions')->insert([
+                    'role_id' => $role->role_id,
+                    'permission_id' => $permissionId,
+                ]);
+            }
+        }
     }
     
 }

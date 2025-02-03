@@ -26,7 +26,7 @@ class CheckPermission
 
         // Check if the user has the required permission
         if (!$auth->user()->hasPermission($permission)) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => 'Forbidden - Insufficient permissions'], 403);
         }
 
         return $next($request);

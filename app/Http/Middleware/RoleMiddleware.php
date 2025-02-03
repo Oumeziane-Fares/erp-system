@@ -23,10 +23,11 @@ class RoleMiddleware
         if (!$auth->check()) {
             return response()->json(['error' => 'Unauthenticated'], 401);
         }
-
-        if (!$auth->user()->hasRole($role)) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+        $user = $auth->user();
+        if (!$user->roles()->where('role_name', $role)->exists()) {
+            return response()->json(['error' => 'Forbidden - Insufficient role access '. $role], 403);
         }
+
 
         return $next($request);
     }

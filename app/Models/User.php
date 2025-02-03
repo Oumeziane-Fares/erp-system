@@ -106,4 +106,10 @@ class User extends Authenticatable implements JWTSubject
         }
         return false;
     }
+
+    // Relationship with StockMovement
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class, 'user_id', 'user_id');
+    }
 }
